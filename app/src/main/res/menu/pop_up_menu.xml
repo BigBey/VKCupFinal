@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/about_group"
+        android:title="@string/about_group">
+    </item>
+    <item
+        android:id="@+id/albums"
+        android:title="@string/albums">
+    </item>
+    <item
+        android:id="@+id/audios"
+        android:title="@string/audios">
+    </item>
+    <item
+        android:id="@+id/playlists"
+        android:title="@string/playlists">
+    </item>
+    <item
+        android:id="@+id/documents"
+        android:title="@string/documents">
+    </item>
+
+</menu>

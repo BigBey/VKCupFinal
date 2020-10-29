@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="selectedGroupBorder">#3f8ae0</color>
+    <color name="colorOfExtraInfo">#818c99</color>
+    <color name="colorForCountOfGroups">#4986cc</color>
+</resources>
