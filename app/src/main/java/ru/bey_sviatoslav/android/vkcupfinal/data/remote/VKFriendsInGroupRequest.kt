@@ -1,10 +1,10 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.requests
+package ru.bey_sviatoslav.android.vkcupfinal.data.remote
 
 import com.vk.api.sdk.requests.VKRequest
 import org.json.JSONObject
 
-class VKFriendsInGroupRequest : VKRequest<Int> {
-    constructor(groupId: Int) : super("groups.getMembers") {
+class VKFriendsInGroupRequest(groupId: Int) : VKRequest<Int>("groups.getMembers") {
+    init {
         addParam("group_id", groupId)
         addParam("filter", "friends")
     }

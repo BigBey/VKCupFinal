@@ -1,4 +1,4 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.utils
+package ru.bey_sviatoslav.android.vkcupfinal.utils
 
 import java.util.*
 

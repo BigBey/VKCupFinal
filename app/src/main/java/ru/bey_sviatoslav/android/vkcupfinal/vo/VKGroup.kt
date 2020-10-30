@@ -1,4 +1,4 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.models
+package ru.bey_sviatoslav.android.vkcupfinal.vo
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -20,11 +20,12 @@ data class VKGroup(
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readInt()!!,
+        parcel.readInt(),
         parcel.readString()!!,
-        parcel.readInt()!!,
+        parcel.readInt(),
         parcel.readString()!!,
-        parcel.readInt()!!)
+        parcel.readInt()
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)

@@ -15,4 +15,10 @@
     <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
     </style>
+
+    <style name="AppTheme.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAppearance">@style/TextAppearance.AppTheme.Button.OnPrimary</item>
+        <item name="android:background">@drawable/gradient</item>
+        <item name="backgroundTint">@null</item>
+    </style>
 </resources>

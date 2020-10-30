@@ -1,11 +1,11 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.requests
+package ru.bey_sviatoslav.android.vkcupfinal.data.remote
 
 import com.vk.api.sdk.requests.VKRequest
 import org.json.JSONObject
-import ru.bey_sviatoslav.android.vkcupfinal.groups.models.VKGroup
+import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
 
-class VKGroupsRequest: VKRequest<List<VKGroup>> {
-    constructor() : super("groups.get"){
+class VKGroupsRequest() : VKRequest<List<VKGroup>>("groups.get") {
+    init {
         addParam("extended", 1)
         addParam("fields", listOf("members_count","description", "is_member"))
     }

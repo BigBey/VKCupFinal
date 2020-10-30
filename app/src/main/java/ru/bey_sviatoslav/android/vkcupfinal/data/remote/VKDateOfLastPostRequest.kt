@@ -1,11 +1,11 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.requests
+package ru.bey_sviatoslav.android.vkcupfinal.data.remote
 
 import com.vk.api.sdk.requests.VKRequest
 import org.json.JSONArray
 import org.json.JSONObject
 
-class VKDateOfLastPostRequest : VKRequest<Int>{
-    constructor(vkGroupId : Int) : super("wall.get"){
+class VKDateOfLastPostRequest(vkGroupId: Int) : VKRequest<Int>("wall.get") {
+    init {
         addParam("owner_id", -vkGroupId)
     }
 

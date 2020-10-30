@@ -7,17 +7,9 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.vk.api.sdk.VK
-import com.vk.api.sdk.VKApiCallback
-import com.vk.api.sdk.exceptions.VKApiExecutionException
 import ru.bey_sviatoslav.android.vkcupfinal.R
 import ru.bey_sviatoslav.android.vkcupfinal.groups.GroupsActivity
-import ru.bey_sviatoslav.android.vkcupfinal.groups.models.VKGroup
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKDateOfLastPostRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKFriendsInGroupRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.roundFollowers
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.roundFriends
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.toDate
+import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
 
 
 //Унаследуем наш класс GroupAdapter от класса RecyclerView.Adapter

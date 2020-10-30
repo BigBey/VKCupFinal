@@ -6,4 +6,20 @@
     <color name="selectedGroupBorder">#3f8ae0</color>
     <color name="colorOfExtraInfo">#818c99</color>
     <color name="colorForCountOfGroups">#4986cc</color>
+
+    <color name="colorPrimaryBackground">#ffffff</color>
+    <color name="colorPrimarySurface">#ffffff</color>
+    <color name="colorPrimaryError">#B00020</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnPrimaryMedium">#FFFFFF</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorOnBackground">#000000</color>
+    <color name="colorOnBackgroundMedium">#99000000</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorOnSurfaceMedium">#99000000</color>
+    <color name="colorOnError">#ffffff</color>
+    <color name="colorGray">#404041</color>
+
+    <color name="colorBadgeBackground">#EB5757</color>
+    <color name="colorOnBadge">#FFFFFF</color>
 </resources>

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -22,22 +23,22 @@ import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthCallback
 import com.vk.api.sdk.auth.VKScope
 import com.vk.api.sdk.exceptions.VKApiExecutionException
-import com.vk.api.sdk.utils.VKUtils.getCertificateFingerprint
+import dagger.hilt.android.AndroidEntryPoint
 import ru.bey_sviatoslav.android.vkcupfinal.R
+import ru.bey_sviatoslav.android.vkcupfinal.base.BaseActivity
+import ru.bey_sviatoslav.android.vkcupfinal.base.MviViewModel
+import ru.bey_sviatoslav.android.vkcupfinal.data.remote.*
 import ru.bey_sviatoslav.android.vkcupfinal.groups.adapter.GroupAdapter
-import ru.bey_sviatoslav.android.vkcupfinal.groups.models.VKGroup
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKDateOfLastPostRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKFriendsInGroupRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKGroupsRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.requests.VKLeaveGroupRequest
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.roundFollowers
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.roundFriends
-import ru.bey_sviatoslav.android.vkcupfinal.groups.utils.toDate
+import ru.bey_sviatoslav.android.vkcupfinal.utils.*
+import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
 
+@AndroidEntryPoint
+class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.OnMenuItemClickListener {
 
-class GroupsActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
+    override val layoutResourceId: Int
+        get() = R.layout.activity_main
 
-    private val TAG = "MainActivity"
+    override val viewModel: GroupsViewModel by viewModels()
 
     private lateinit var groupsRecyclerView: RecyclerView
     private lateinit var groupAdapter : GroupAdapter
@@ -82,6 +83,14 @@ class GroupsActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
         loginVK()
 
         initRefreshLayout()
+    }
+
+    override fun initViews() {
+
+    }
+
+    override fun render(viewState: GroupsViewState) {
+        TODO("Not yet implemented")
     }
 
     private fun initRecyclerView() {
@@ -335,5 +344,9 @@ class GroupsActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
         refreshLayout.setOnRefreshListener {
             loadGroups()
         }
+    }
+
+    companion object {
+        private val TAG = "MainActivity"
     }
 }

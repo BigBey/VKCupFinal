@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance.AppTheme.ItemProductNameText" parent="TextAppearance.AppTheme.Subtitle1">
+        <item name="android:textColor">@color/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.ItemProductPriceText" parent="TextAppearance.AppTheme.Body2">
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.ToolbarTitleMain" parent="TextAppearance.AppTheme.Subtitle1">
+        <item name="android:textColor">@color/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.MessageText" parent="TextAppearance.AppTheme.Subtitle1">
+        <item name="android:textColor">@color/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.Button.OnPrimary" parent="TextAppearance.AppTheme.Button">
+        <item name="android:textColor">@color/colorOnPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.BadgeText" parent="TextAppearance.AppTheme.Caption">
+        <item name="android:textColor">@color/colorOnBadge</item>
+    </style>
+
+</resources>

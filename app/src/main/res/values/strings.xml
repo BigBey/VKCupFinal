@@ -11,4 +11,8 @@
     <string name="documents">Документы</string>
     <string name="open">Открыть</string>
     <string name="leave">Отписаться</string>
+
+    <string name="item_loading_error_btn_text">Retry</string>
+    <string name="item_loading_error_text">Loading error</string>
+    <string name="item_empty_text">No data</string>
 </resources>

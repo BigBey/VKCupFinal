@@ -1,10 +1,10 @@
-package ru.bey_sviatoslav.android.vkcupfinal.groups.requests
+package ru.bey_sviatoslav.android.vkcupfinal.data.remote
 
 import com.vk.api.sdk.requests.VKRequest
 import org.json.JSONObject
 
-class VKLeaveGroupRequest : VKRequest<Int> {
-    constructor(groupId: Int) : super("groups.leave"){
+class VKLeaveGroupRequest(groupId: Int) : VKRequest<Int>("groups.leave") {
+    init {
         addParam("group_id", groupId)
     }
 
