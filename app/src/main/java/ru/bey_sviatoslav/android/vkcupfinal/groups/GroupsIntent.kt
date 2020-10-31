@@ -16,14 +16,14 @@ sealed class GroupsIntent : MviIntent{
 
     object GroupMenuIntent : GroupsIntent()
 
-    data class GroupInfoIntent(val groupId: Int) : GroupsIntent()
+    data class GroupInfoIntent(val group: VKGroup) : GroupsIntent()
 
-    data class GroupAlbumsIntent(val groupId: Int) : GroupsIntent()
+    data class GroupAlbumsIntent(val group: VKGroup) : GroupsIntent()
 
-    data class GroupAudiosIntent(val groupId: Int) : GroupsIntent()
+    data class GroupAudiosIntent(val group: VKGroup) : GroupsIntent()
 
-    data class GroupPlaylistsIntent(val groupId: Int) : GroupsIntent()
+    data class GroupPlaylistsIntent(val group: VKGroup) : GroupsIntent()
 
-    data class GroupDocumentsIntent(val groupId: Int) : GroupsIntent()
+    data class GroupDocumentsIntent(val group: VKGroup) : GroupsIntent()
 
 }

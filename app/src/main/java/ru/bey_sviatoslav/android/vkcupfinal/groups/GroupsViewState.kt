@@ -3,16 +3,6 @@ package ru.bey_sviatoslav.android.vkcupfinal.groups
 import ru.bey_sviatoslav.android.vkcupfinal.base.MviViewState
 import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
 
-enum class GroupMenuAction{
-    DEFAULT,
-    OPEN_GROUP_MENU,
-    OPEN_GROUP_INFO,
-    OPEN_GROUP_ALBUMS,
-    OPEN_GROUP_AUDIOS,
-    OPEN_GROUP_PLAYLISTS,
-    OPEN_GROUP_DOCUMENTS
-}
-
 data class GroupsViewState(
     val isLoggedIn: Boolean,
     val isInitialLoading: Boolean,
@@ -21,6 +11,9 @@ data class GroupsViewState(
     val isRefreshLoading: Boolean,
     val refreshError: Throwable?,
     val groupMenuAction: GroupMenuAction,
+    val currentGroup: VKGroup?,
+    val countOfFriendsInGroup: Int?,
+    val dateOfLastPost: Int?,
     val canDeleteAllSelected: Boolean?,
     val groupsForDelete: List<VKGroup>
 ) : MviViewState {
@@ -33,6 +26,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -45,6 +41,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -57,6 +56,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -69,6 +71,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -81,6 +86,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -93,6 +101,9 @@ data class GroupsViewState(
             isRefreshLoading = true,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -108,13 +119,17 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = error,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
 
         fun groupMenuState(
             groups: List<VKGroup>,
-            groupMenuAction: GroupMenuAction
+            groupMenuAction: GroupMenuAction,
+            currentGroup: VKGroup?
         ): GroupsViewState = GroupsViewState(
             isLoggedIn = true,
             isInitialLoading = false,
@@ -123,6 +138,30 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = groupMenuAction,
+            currentGroup = currentGroup,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
+            canDeleteAllSelected = null,
+            groupsForDelete = emptyList()
+        )
+
+        fun groupInfoState(
+            groups: List<VKGroup>,
+            groupMenuAction: GroupMenuAction,
+            currentGroup: VKGroup?,
+            countOfFriendsInGroup: Int?,
+            dateOfLastPost: Int?
+        ): GroupsViewState = GroupsViewState(
+            isLoggedIn = true,
+            isInitialLoading = false,
+            initialError = null,
+            groups = groups,
+            isRefreshLoading = false,
+            refreshError = null,
+            groupMenuAction = groupMenuAction,
+            currentGroup = currentGroup,
+            countOfFriendsInGroup = countOfFriendsInGroup,
+            dateOfLastPost = dateOfLastPost,
             canDeleteAllSelected = null,
             groupsForDelete = emptyList()
         )
@@ -139,6 +178,9 @@ data class GroupsViewState(
             isRefreshLoading = false,
             refreshError = null,
             groupMenuAction = GroupMenuAction.DEFAULT,
+            currentGroup = null,
+            countOfFriendsInGroup = null,
+            dateOfLastPost = null,
             canDeleteAllSelected = canDeleteAllSelected,
             groupsForDelete = groupsForDelete
         )

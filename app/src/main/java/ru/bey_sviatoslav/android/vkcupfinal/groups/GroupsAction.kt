@@ -15,13 +15,13 @@ sealed class GroupsAction : MviAction{
 
     object OpenGroupMenuAction : GroupsAction()
 
-    data class OpenGroupInfoAction(val groupId: Int) : GroupsAction()
+    data class OpenGroupInfoAction(val group: VKGroup) : GroupsAction()
 
-    data class OpenGroupAlbumsAction(val groupId: Int) : GroupsAction()
+    data class OpenGroupAlbumsAction(val group: VKGroup) : GroupsAction()
 
-    data class OpenGroupAudiosAction(val groupId: Int) : GroupsAction()
+    data class OpenGroupAudiosAction(val group: VKGroup) : GroupsAction()
 
-    data class OpenGroupPlaylistsAction(val groupId: Int) : GroupsAction()
+    data class OpenGroupPlaylistsAction(val group: VKGroup) : GroupsAction()
 
-    data class OpenGroupDocumentsAction(val groupId: Int) : GroupsAction()
+    data class OpenGroupDocumentsAction(val group: VKGroup) : GroupsAction()
 }

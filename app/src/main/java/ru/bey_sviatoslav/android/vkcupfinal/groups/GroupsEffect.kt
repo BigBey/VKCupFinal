@@ -1,5 +1,6 @@
 package ru.bey_sviatoslav.android.vkcupfinal.groups
 
+import com.vk.api.sdk.VK
 import ru.bey_sviatoslav.android.vkcupfinal.base.MviEffect
 import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
 
@@ -30,6 +31,13 @@ sealed class GroupsEffect : MviEffect{
 
     data class GroupMenuEffect(
         val groupMenuAction: GroupMenuAction,
-        val groupId: Int?
+        val group: VKGroup?
+    ): GroupsEffect()
+
+    data class GroupInfoEffect(
+        val group: VKGroup,
+        val groupMenuAction: GroupMenuAction,
+        val countOfFriendsInGroup: Int?,
+        val dateOfLastPost: Int?
     ): GroupsEffect()
 }

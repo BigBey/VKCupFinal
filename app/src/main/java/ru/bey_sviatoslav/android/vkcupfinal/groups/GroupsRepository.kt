@@ -15,6 +15,7 @@ import ru.bey_sviatoslav.android.vkcupfinal.utils.Result
 import ru.bey_sviatoslav.android.vkcupfinal.utils.roundFollowers
 import ru.bey_sviatoslav.android.vkcupfinal.utils.roundFriends
 import ru.bey_sviatoslav.android.vkcupfinal.utils.toDate
+import javax.inject.Inject
 import kotlin.coroutines.resume
 
 interface GroupsRepository {
@@ -24,7 +25,7 @@ interface GroupsRepository {
     suspend fun leaveGroup(groupId: Int): Result<Int>
 }
 
-class RemoteGroupsRepository : GroupsRepository {
+class RemoteGroupsRepository @Inject constructor() : GroupsRepository {
 
     private val TAG = "RemoteGroupsRepository"
 

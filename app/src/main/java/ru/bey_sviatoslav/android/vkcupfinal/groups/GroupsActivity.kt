@@ -2,46 +2,52 @@ package ru.bey_sviatoslav.android.vkcupfinal.groups
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.onto.base.recycler.RecyclerState
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.vk.api.sdk.VK
-import com.vk.api.sdk.VKApiCallback
 import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthCallback
 import com.vk.api.sdk.auth.VKScope
-import com.vk.api.sdk.exceptions.VKApiExecutionException
 import dagger.hilt.android.AndroidEntryPoint
 import ru.bey_sviatoslav.android.vkcupfinal.R
 import ru.bey_sviatoslav.android.vkcupfinal.base.BaseActivity
-import ru.bey_sviatoslav.android.vkcupfinal.base.MviViewModel
-import ru.bey_sviatoslav.android.vkcupfinal.data.remote.*
-import ru.bey_sviatoslav.android.vkcupfinal.groups.adapter.GroupAdapter
-import ru.bey_sviatoslav.android.vkcupfinal.utils.*
+import ru.bey_sviatoslav.android.vkcupfinal.groups.adapter.GroupAdapterV
+import ru.bey_sviatoslav.android.vkcupfinal.utils.roundFollowers
+import ru.bey_sviatoslav.android.vkcupfinal.utils.roundFriends
+import ru.bey_sviatoslav.android.vkcupfinal.utils.toDate
 import ru.bey_sviatoslav.android.vkcupfinal.vo.VKGroup
+import ru.bey_sviatoslav.android.vkcupfinal.groups.GroupMenuAction.*
+import ru.bey_sviatoslav.android.vkcupfinal.groups.adapter.GroupViewHolder
+import ru.bey_sviatoslav.android.vkcupfinal.sharing.SharePostActivity
 
 @AndroidEntryPoint
-class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.OnMenuItemClickListener {
+class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>() {
 
     override val layoutResourceId: Int
-        get() = R.layout.activity_main
+        get() = R.layout.activity_groups
 
     override val viewModel: GroupsViewModel by viewModels()
 
+    private val intentLiveData = MutableLiveData<GroupsIntent>().also { intents ->
+        intents.value = GroupsIntent.VKLoginIntent
+        _intentLiveData.addSource(intents) {
+            _intentLiveData.value = it
+        }
+    }
+
     private lateinit var groupsRecyclerView: RecyclerView
-    private lateinit var groupAdapter : GroupAdapter
+    private lateinit var groupAdapter : GroupAdapterV
 
     private lateinit var appBarLayout: AppBarLayout
     private lateinit var collapsingToolbarLayout: CollapsingToolbarLayout
@@ -53,6 +59,7 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
     private lateinit var followersTextView: TextView
     private lateinit var articleTextView: TextView
     private lateinit var newsfeedTextView: TextView
+    private lateinit var shareButton : Button
     private lateinit var openButton : Button
     private lateinit var closeImageButton: ImageButton
 
@@ -62,16 +69,11 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
 
     private lateinit var refreshLayout : SwipeRefreshLayout
 
-    private var vkGroups : ArrayList<VKGroup> =  ArrayList()
-
-    private lateinit var currentGroup: VKGroup
+    private var vkGroupsForDelete : ArrayList<VKGroup> =  ArrayList()
 
     private var groupScreenNameForBottomSheet = ""
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
+    override fun initViews() {
         supportActionBar?.hide()
 
         initBars()
@@ -80,23 +82,101 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
 
         initBottomLayout()
 
-        loginVK()
-
         initRefreshLayout()
-    }
 
-    override fun initViews() {
-
+        initRecyclerView()
     }
 
     override fun render(viewState: GroupsViewState) {
-        TODO("Not yet implemented")
+        val state = when {
+            !viewState.isLoggedIn -> {
+                loginVK()
+                RecyclerState.LOADING
+            }
+            viewState.isInitialLoading -> RecyclerState.LOADING
+            viewState.initialError != null -> RecyclerState.ERROR
+            viewState.groups.isEmpty() -> RecyclerState.EMPTY
+            viewState.groupsForDelete.isNotEmpty() -> {
+                if(viewState.canDeleteAllSelected!!){
+                    Toast.makeText(this, "К сожалению не удалось отписаться от всех сообществ:(", Toast.LENGTH_LONG)
+                }
+                for(i in 0 until groupsRecyclerView.childCount){
+                    val viewHolder = groupsRecyclerView.getChildViewHolder(groupsRecyclerView.getChildAt(i)) as GroupViewHolder
+                    viewHolder.setIsChecked(false)
+                }
+                groupAdapter.notifyDataSetChanged()
+                RecyclerState.ITEM
+            }
+            else -> RecyclerState.ITEM
+        }
+
+        when (viewState.groupMenuAction){
+            OPEN_GROUP_INFO -> {
+                setGroupScreenNameForLongTap("https://vk.com/${viewState.currentGroup!!.screenName}")
+                setTitleText(viewState.currentGroup.name)
+                setTitleText(
+                    if (viewState.currentGroup.name.length > 31) viewState.currentGroup.name.substring(
+                        0,
+                        27
+                    ) + "..." else viewState.currentGroup.name
+                )
+                setFollowersText(viewState.currentGroup.membersCount.roundFollowers() + " · " + viewState.currentGroup.membersCount.roundFriends())
+                setArticleText(viewState.currentGroup.description)
+                setNewsfeedText("Последняя запись " + viewState.dateOfLastPost!!.toLong().toDate())
+                shareButton.setOnClickListener {
+                    val intent = Intent(this@GroupsActivity, SharePostActivity::class.java)
+                    intent.putExtra(GROUP_ID, viewState.currentGroup.id)
+                    startActivity(intent)
+                }
+                showBottomSheetDialog()
+                RecyclerState.ITEM
+            }
+            OPEN_GROUP_ALBUMS -> {
+                //TODO
+            }
+            OPEN_GROUP_AUDIOS -> {
+                onBrowseClick("https://vk.com/audios-${viewState.currentGroup!!.id}")
+            }
+            OPEN_GROUP_PLAYLISTS -> {
+                onBrowseClick("https://vk.com/audios-${viewState.currentGroup!!.id}?section=playlists")
+            }
+            OPEN_GROUP_DOCUMENTS -> {
+                //TODO
+            }
+        }
+
+        val isRefreshable = !(viewState.isInitialLoading || viewState.initialError != null)
+
+        refreshLayout.isEnabled = isRefreshable
+        refreshLayout.isRefreshing = viewState.isRefreshLoading
+        groupAdapter.updateData(viewState.groups, state)
+        
     }
 
     private fun initRecyclerView() {
         groupsRecyclerView = findViewById<RecyclerView>(R.id.groups_recycler_view)
         groupsRecyclerView.setLayoutManager(GridLayoutManager(this, 3))
-        groupAdapter = GroupAdapter(this, vkGroups)
+        groupAdapter = GroupAdapterV(
+            onRetry = {
+                intentLiveData.value = GroupsIntent.ReloadIntent
+            },
+            onCLick = { vkGroup, isChecked ->
+                if(isChecked) {
+                    vkGroupsForDelete.add(vkGroup)
+                }else{
+                    vkGroupsForDelete.remove(vkGroup)
+                }
+                groupAdapter.notifyDataSetChanged()
+                if(vkGroupsForDelete.isNotEmpty()) {
+                    showBottomLayout()
+                }else{
+                    hideBottomLayout()
+                }
+            },
+            onLongClick = { vkGroup, view ->
+                showPopUpWindow(view, vkGroup)
+            }
+        )
         groupsRecyclerView.adapter = groupAdapter
 
         groupsRecyclerView.setHasFixedSize(true)
@@ -131,7 +211,7 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
     fun initBottomSheetDialog(){
         bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
         val bottomSheetView = LayoutInflater.from(applicationContext).inflate(
-            R.layout.layout_bottom_sheet,
+            R.layout.layout_bottom_sheet_group_info,
             findViewById<LinearLayout>(R.id.bottom_sheet_container)
         )
 
@@ -139,6 +219,8 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
         followersTextView = bottomSheetView.findViewById(R.id.followersTextView)
         articleTextView = bottomSheetView.findViewById(R.id.articleTextView)
         newsfeedTextView = bottomSheetView.findViewById(R.id.newsfeedTextView)
+
+        shareButton = bottomSheetView.findViewById<Button>(R.id.shareButton)
 
         openButton = bottomSheetView.findViewById<Button>(R.id.openButton).apply {
             setOnClickListener {
@@ -160,69 +242,37 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
         bottomLayout = findViewById(R.id.bottom_layout)
         leaveButton = findViewById(R.id.leave_button)
         leaveButton.setOnClickListener {
-            leaveGroups(groupAdapter.getChecked())
+            intentLiveData.value = GroupsIntent.LeaveGroupsIntent(vkGroupsForDelete)
             hideBottomLayout()
         }
         countOfGroupsToLeave = findViewById(R.id.count_of_groups_to_leave_text_view)
 
     }
 
-    internal fun showPopUpWindow(view : View){
+    private fun showPopUpWindow(view : View, vkGroup: VKGroup){
         val popupMenu = PopupMenu(this, view)
-        popupMenu.setOnMenuItemClickListener(this)
+        popupMenu.setOnMenuItemClickListener{
+            when(it!!.itemId){
+                R.id.about_group -> {
+                    intentLiveData.value = GroupsIntent.GroupInfoIntent(vkGroup)
+                }
+                R.id.albums-> {
+                    intentLiveData.value = GroupsIntent.GroupAlbumsIntent(vkGroup)
+                }
+                R.id.audios-> {
+                    intentLiveData.value = GroupsIntent.GroupAudiosIntent(vkGroup)
+                }
+                R.id.playlists-> {
+                    intentLiveData.value = GroupsIntent.GroupPlaylistsIntent(vkGroup)
+                }
+                R.id.documents-> {
+                    intentLiveData.value = GroupsIntent.GroupDocumentsIntent(vkGroup)
+                }
+            }
+            return@setOnMenuItemClickListener true
+        }
         popupMenu.inflate(R.menu.pop_up_menu)
         popupMenu.show()
-    }
-
-    override fun onMenuItemClick(item: MenuItem?): Boolean {
-        when(item!!.itemId) {
-            R.id.about_group -> {
-                setGroupScreenNameForLongTap("https://vk.com/${currentGroup.screenName}")
-                setTitleText(currentGroup.name)
-                VK.execute(VKFriendsInGroupRequest(currentGroup.id), object : VKApiCallback<Int> {
-                    override fun fail(error: VKApiExecutionException) {
-                        val a = 1
-                    }
-
-                    override fun success(result: Int) {
-                        setTitleText(
-                            if (currentGroup.name.length > 31) currentGroup.name.substring(
-                                0,
-                                27
-                            ) + "..." else currentGroup.name
-                        )
-                        setFollowersText(currentGroup.membersCount.roundFollowers() + " · " + result.roundFriends())
-                        setArticleText(currentGroup.description)
-                        VK.execute(VKDateOfLastPostRequest(currentGroup.id), object : VKApiCallback<Int> {
-                            override fun fail(error: VKApiExecutionException) {
-
-                            }
-
-                            override fun success(result: Int) {
-                                setNewsfeedText("Последняя запись " + result.toLong().toDate())
-                            }
-
-                        })
-                        showBottomSheetDialog()
-                    }
-
-
-                })
-            }
-            R.id.albums-> {
-                //TODO
-            }
-            R.id.audios-> {
-                onBrowseClick("https://vk.com/audios-${currentGroup.id}")
-            }
-            R.id.playlists-> {
-                onBrowseClick("https://vk.com/audios-${currentGroup.id}?section=playlists")
-            }
-            R.id.documents-> {
-                //TODO
-            }
-        }
-        return true
     }
 
     internal fun showBottomLayout(){
@@ -236,7 +286,7 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val callback = object: VKAuthCallback {
             override fun onLogin(token: VKAccessToken) {
-                loadGroups()
+                intentLiveData.value = GroupsIntent.InitialIntent
             }
 
             override fun onLoginFailed(errorCode: Int) {
@@ -250,53 +300,34 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
 
     private fun loginVK(){
         if(!VK.isLoggedIn()) {
-            VK.login(this, arrayListOf(VKScope.GROUPS, VKScope.WALL))
+            VK.login(this, arrayListOf(VKScope.GROUPS, VKScope.WALL, VKScope.PHOTOS))
         }else {
-            loadGroups()
+            intentLiveData.value = GroupsIntent.InitialIntent
         }
     }
 
-
-    private fun loadGroups(){
-
-        VK.execute(VKGroupsRequest(), object : VKApiCallback<List<VKGroup>> {
-            override fun success(result: List<VKGroup>) {
-                vkGroups = result as ArrayList<VKGroup>
-                initRecyclerView()
-            }
-
-            override fun fail(error: VKApiExecutionException) {
-                val a = 1
-            }
-        })
-    }
-
-    internal fun setTitleText(text: String){
+    private fun setTitleText(text: String){
         titleTextView.setText(text)
     }
 
-    internal fun setCurrentGroup(currentVKGroup: VKGroup){
-        this.currentGroup = currentVKGroup
-    }
-
-    internal fun setFollowersText(text: String){
+    private fun setFollowersText(text: String){
         followersTextView.setText(text)
     }
 
-    internal fun setArticleText(text: String){
+    private fun setArticleText(text: String){
         articleTextView.setText(text)
     }
 
-    internal fun setNewsfeedText(text: String){
+    private fun setNewsfeedText(text: String){
         newsfeedTextView.setText(text)
     }
 
-    internal fun showBottomSheetDialog() : Boolean{
+    private fun showBottomSheetDialog() : Boolean{
         bottomSheetDialog.show()
         return true
     }
 
-    internal fun setGroupScreenNameForLongTap(string: String){
+    private fun setGroupScreenNameForLongTap(string: String){
         groupScreenNameForBottomSheet = string
     }
 
@@ -309,44 +340,15 @@ class GroupsActivity : BaseActivity<GroupsViewState, GroupsIntent>(), PopupMenu.
         }
     }
 
-    private fun leaveGroups(groupsToLeave: Array<Int?>){
-        var k = 0
-        for((index, group) in groupsToLeave.withIndex()){
-            if(group != null){
-                VK.execute(VKLeaveGroupRequest(group), object : VKApiCallback<Int> {
-                    override fun success(result: Int) {
-                        if (result == 1)
-                            Log.d(TAG, "group with id = $group with index $index was left")
-                    }
-
-                    override fun fail(error: VKApiExecutionException) {
-                        Log.d(TAG, "group with id = $group with index $index wasn't left")
-                    }
-                })
-                try {
-                    groupAdapter.deleteItem(index - k)
-                    groupAdapter.notifyItemRemoved(index - k)
-                    groupAdapter.notifyItemRangeChanged(index - k, vkGroups.size)
-                    groupAdapter.notifyDataSetChanged()
-                    k++
-                }catch (e: IndexOutOfBoundsException){
-                    Log.d(TAG, "IndexOutOfBoundsException at ${group}")
-                }
-            }
-        }
-        groupAdapter.setChecked(vkGroups.size)
-        groupAdapter.setCheckedCount(0)
-        groupAdapter.notifyDataSetChanged()
-    }
-
     private fun initRefreshLayout(){
         refreshLayout = findViewById(R.id.refresh_layout)
         refreshLayout.setOnRefreshListener {
-            loadGroups()
+            intentLiveData.value = GroupsIntent.RefreshIntent
         }
     }
 
     companion object {
         private val TAG = "MainActivity"
+        const val GROUP_ID = "groupId"
     }
 }

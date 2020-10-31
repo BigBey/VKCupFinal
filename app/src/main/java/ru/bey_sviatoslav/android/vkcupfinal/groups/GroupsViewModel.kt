@@ -16,11 +16,11 @@ class GroupsViewModel @ViewModelInject constructor(val repository: RemoteGroupsR
             is GroupsIntent.RefreshIntent -> GroupsAction.RefreshGroupsAction
             is GroupsIntent.LeaveGroupsIntent -> GroupsAction.LeaveGroupsAction(intent.groupsForDelete)
             is GroupsIntent.GroupMenuIntent -> GroupsAction.OpenGroupMenuAction
-            is GroupsIntent.GroupInfoIntent -> GroupsAction.OpenGroupInfoAction(intent.groupId)
-            is GroupsIntent.GroupAlbumsIntent -> GroupsAction.OpenGroupAlbumsAction(intent.groupId)
-            is GroupsIntent.GroupAudiosIntent -> GroupsAction.OpenGroupAudiosAction(intent.groupId)
-            is GroupsIntent.GroupPlaylistsIntent -> GroupsAction.OpenGroupPlaylistsAction(intent.groupId)
-            is GroupsIntent.GroupDocumentsIntent -> GroupsAction.OpenGroupDocumentsAction(intent.groupId)
+            is GroupsIntent.GroupInfoIntent -> GroupsAction.OpenGroupInfoAction(intent.group)
+            is GroupsIntent.GroupAlbumsIntent -> GroupsAction.OpenGroupAlbumsAction(intent.group)
+            is GroupsIntent.GroupAudiosIntent -> GroupsAction.OpenGroupAudiosAction(intent.group)
+            is GroupsIntent.GroupPlaylistsIntent -> GroupsAction.OpenGroupPlaylistsAction(intent.group)
+            is GroupsIntent.GroupDocumentsIntent -> GroupsAction.OpenGroupDocumentsAction(intent.group)
 
         }
 
@@ -66,11 +66,35 @@ class GroupsViewModel @ViewModelInject constructor(val repository: RemoteGroupsR
                 }
             }
             is GroupsAction.OpenGroupMenuAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_MENU, null)
-            is GroupsAction.OpenGroupInfoAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_INFO, action.groupId)
-            is GroupsAction.OpenGroupAlbumsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_ALBUMS, action.groupId)
-            is GroupsAction.OpenGroupAudiosAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_AUDIOS, action.groupId)
-            is GroupsAction.OpenGroupPlaylistsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_PLAYLISTS, action.groupId)
-            is GroupsAction.OpenGroupDocumentsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_DOCUMENTS, action.groupId)
+            is GroupsAction.OpenGroupInfoAction -> {
+                var countOfFriendsInGroup: Int?  = null
+                var dateOfLastPost: Int?  = null
+                countOfFriendsInGroup = when (val result = repository.getFriendsInGroup(action.group.id)){
+                    is Result.Success -> {
+                        result.data
+                    }
+                    is Result.Error -> {
+                        null
+                    }
+                }
+                dateOfLastPost = when (val result = repository.getFriendsInGroup(action.group.id)){
+                    is Result.Success -> {
+                        result.data
+                    }
+                    is Result.Error -> {
+                        null
+                    }
+                }
+                if (countOfFriendsInGroup == null || dateOfLastPost == null){
+                    GroupsEffect.GroupInfoEffect(action.group, GroupMenuAction.OPEN_GROUP_INFO, null, null)
+                }else{
+                    GroupsEffect.GroupInfoEffect(action.group, GroupMenuAction.OPEN_GROUP_INFO, countOfFriendsInGroup, dateOfLastPost)
+                }
+            }
+            is GroupsAction.OpenGroupAlbumsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_ALBUMS, action.group)
+            is GroupsAction.OpenGroupAudiosAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_AUDIOS, action.group)
+            is GroupsAction.OpenGroupPlaylistsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_PLAYLISTS, action.group)
+            is GroupsAction.OpenGroupDocumentsAction -> GroupsEffect.GroupMenuEffect(GroupMenuAction.OPEN_GROUP_DOCUMENTS, action.group)
         }
 
 
@@ -91,6 +115,7 @@ class GroupsViewModel @ViewModelInject constructor(val repository: RemoteGroupsR
                 }
                 GroupsViewState.leaveGroupsState(remainingGroups, effect.canDeleteAllSelected, effect.groupsForDelete)
             }
-            is GroupsEffect.GroupMenuEffect -> GroupsViewState.groupMenuState(oldState.groups, effect.groupMenuAction)
+            is GroupsEffect.GroupMenuEffect -> GroupsViewState.groupMenuState(oldState.groups, effect.groupMenuAction, effect.group)
+            is GroupsEffect.GroupInfoEffect -> GroupsViewState.groupInfoState(oldState.groups, effect.groupMenuAction, effect.group, effect.countOfFriendsInGroup, effect.dateOfLastPost)
         }
 }
